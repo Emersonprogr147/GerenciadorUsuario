@@ -82,8 +82,8 @@ comando this sempre ira respeitar o escopo  onde esta atuando !! */
         });
 
     }
- /* the function getValues() will get all the values entered by the user */
- 
+    /* the function getValues() will get all the values entered by the user */
+
     getValues() {
 
         /* type let will only exist inside the getValues() function outside it will not exist*/
@@ -139,7 +139,7 @@ comando this sempre ira respeitar o escopo  onde esta atuando !! */
     addLine(dataUser) {
         let tr = document.createElement('tr');
 
-        tr.dataset.user = JSON.stringify(dataUser ); 
+        tr.dataset.user = JSON.stringify(dataUser);
         tr.innerHTML = `
  
      <td><img src=${dataUser.photo} class="img-circle img-sm"></td>
@@ -148,11 +148,17 @@ comando this sempre ira respeitar o escopo  onde esta atuando !! */
      <td>${dataUser.admin ? 'Sim' : 'Nao'}</td>
      <td>${Utils.dataFormat(dataUser.register)}</td>
      <td>
-         <button type="button" class="btn btn-primary btn-xs btn-flat">Editar</button>
-         <button type="button" class="btn btn-danger btn-xs btn-flat">Excluir</button>
-     </td>
+         <button type="button" class="btn btn-primary  btn-edit  btn-xs btn-flat">Editar</button>
+         <button type="button" class="btn   btn-danger  btn-xs btn-flat">Excluir</button>
+     </td> 
  
 `;
+
+
+        tr.querySelector(".btn-edit").addEventListener("click", e => {
+
+            console.log(JSON.parse(tr.dataset.User));
+        });
 
         this.tableEl.append(tr);
 
@@ -164,24 +170,25 @@ comando this sempre ira respeitar o escopo  onde esta atuando !! */
     }
     /* This Method will Calculator Registered Numbers */
 
-    updateCount(){
+    updateCount() {
 
-        let numberUser = 0; 
-         let numberAdmin = 0 ;  
+        let numberUser = 0;
+        let numberAdmin = 0;
 
-            [...this.tableEl.children].forEach (tr=>{
-                   
-
-                numberUser ++ ; 
-                   
-                let user = JSON.parse(tr.dataset.user);
-                if(user._admin) numberAdmin ++ ; 
+        [...this.tableEl.children].forEach(tr => {
 
 
-            }); 
+            numberUser++;
 
-            document.querySelector("#number-users").innerHTML = numberUser ; 
-            document.querySelector("#number-users-admin").innerHTML = numberAdmin ; 
+            let user = JSON.parse(tr.dataset.user);
+
+            if (user._admin) numberAdmin++;
+
+
+        });
+
+        document.querySelector("#number-users").innerHTML = numberUser;
+        document.querySelector("#number-users-admin").innerHTML = numberAdmin;
     }
 
 }
