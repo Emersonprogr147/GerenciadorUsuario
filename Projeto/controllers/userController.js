@@ -6,9 +6,19 @@ class UserController {
         this.formEl = document.getElementById(formId);
         this.tableEl = document.getElementById(tableId);
 
-        this.onSubmit()
-
+        this.onSubmit();
+        this.onEdit();
+       
     }
+
+     onEdit(){
+
+        document.querySelector("#box-user-update   .btn-cancel").addEventListener("click", e=>{
+          
+            this.showPainelCreate();
+
+        });
+     }
 
     onSubmit() {
         /* onSubmit evento quando enviarem ,
@@ -157,10 +167,13 @@ comando this sempre ira respeitar o escopo  onde esta atuando !! */
 
         tr.querySelector(".btn-edit").addEventListener("click", e => {
 
-            console.log(JSON.parse(tr.dataset.User));
+            console.log(JSON.parse(tr.dataset.user));
+
+            this.showPainelUpdate();
+       
         });
 
-        this.tableEl.append(tr);
+        this.tableEl.appendChild(tr);
 
 
 
@@ -169,6 +182,19 @@ comando this sempre ira respeitar o escopo  onde esta atuando !! */
 
     }
     /* This Method will Calculator Registered Numbers */
+
+
+    showPainelCreate(){
+        document.querySelector("#box-user-create").style.display = "none "; 
+        document.querySelector("#box-user-update").style.display = "block"; 
+
+    }
+    
+    showPainelUpdate(){
+        document.querySelector("#box-user-create").style.display = "block"; 
+        document.querySelector("#box-user-update").style.display = "none"; 
+        
+    }
 
     updateCount() {
 
