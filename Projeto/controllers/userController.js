@@ -2,23 +2,19 @@
 class UserController {
 
     constructor(formId, tableId) {
-
         this.formEl = document.getElementById(formId);
         this.tableEl = document.getElementById(tableId);
 
         this.onSubmit();
-        this.onEdit();
-       
+        this.onEditCancel();
     }
 
-     onEdit(){
+    onEditCancel() {
 
-        document.querySelector("#box-user-update   .btn-cancel").addEventListener("click", e=>{
-          
+        document.querySelector("#box-user-update  .btn-cancel").addEventListener("click", e => {
             this.showPainelCreate();
-
         });
-     }
+    }
 
     onSubmit() {
         /* onSubmit evento quando enviarem ,
@@ -53,7 +49,6 @@ comando this sempre ira respeitar o escopo  onde esta atuando !! */
             );
 
         });
-
 
     }
 
@@ -104,8 +99,6 @@ comando this sempre ira respeitar o escopo  onde esta atuando !! */
             if (['name', 'email', 'password'].indexOf(field.name) > -1 && !field.value) {
                 field.parentElement.classList.add('has-error');
                 isValid = false;
-
-
             }
 
             if (field.name === "gender") {
@@ -117,14 +110,11 @@ comando this sempre ira respeitar o escopo  onde esta atuando !! */
             } else if (field.name == "admin") {
                 user[field.name] = field.checked;
 
-
             } else {
 
                 user[field.name] = field.value;
 
             }
-
-
         });
 
         if (!isValid) {
@@ -142,9 +132,7 @@ comando this sempre ira respeitar o escopo  onde esta atuando !! */
             user.admin,
             user.register
         );
-
     }
-
 
     addLine(dataUser) {
         let tr = document.createElement('tr');
@@ -161,60 +149,65 @@ comando this sempre ira respeitar o escopo  onde esta atuando !! */
          <button type="button" class="btn btn-primary  btn-edit  btn-xs btn-flat">Editar</button>
          <button type="button" class="btn   btn-danger  btn-xs btn-flat">Excluir</button>
      </td> 
- 
+
 `;
 
-
         tr.querySelector(".btn-edit").addEventListener("click", e => {
+            let json = JSON.parse(tr.dataset.user);
 
-            console.log(JSON.parse(tr.dataset.user));
+            let form = document.querySelector("#form-user-update");
 
-            this.showPainelUpdate();
-       
+            for (let name in json) {
+
+                let field = form.querySelector("[name =" + nameReplace("_", "") + "]");
+
+
+                if (field) {
+
+                    if (field.type === "file") continue;
+
+                    field.value = json[name];
+                }
+            }
+
+            this.showPanelUpdate();
         });
 
         this.tableEl.appendChild(tr);
 
-
-
         this.updateCount();
 
+    }
+
+    showPanelCreate() {
+
+        document.querySelector("#box-user-create").style.display = "block";
+        document.querySelector("#box-user-update").style.display = "none";
 
     }
-    /* This Method will Calculator Registered Numbers */
+    showPanelUpdate() {
 
+        document.querySelector("#box-user-create").style.display = "none";
+        document.querySelector("#box-user-update").style.display = "block";
 
-    showPainelCreate(){
-        document.querySelector("#box-user-create").style.display = "none "; 
-        document.querySelector("#box-user-update").style.display = "block"; 
-
-    }
-    
-    showPainelUpdate(){
-        document.querySelector("#box-user-create").style.display = "block"; 
-        document.querySelector("#box-user-update").style.display = "none"; 
-        
     }
 
     updateCount() {
 
-        let numberUser = 0;
+        let numberUsers = 0;
         let numberAdmin = 0;
 
         [...this.tableEl.children].forEach(tr => {
 
-
-            numberUser++;
+            numberUsers++;
 
             let user = JSON.parse(tr.dataset.user);
 
             if (user._admin) numberAdmin++;
+        })
 
-
-        });
-
-        document.querySelector("#number-users").innerHTML = numberUser;
+        document.querySelector("#number-users").innerHTML = numberUsers;
         document.querySelector("#number-users-admin").innerHTML = numberAdmin;
-    }
 
+    }
 }
