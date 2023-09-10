@@ -159,19 +159,41 @@ comando this sempre ira respeitar o escopo  onde esta atuando !! */
 
             for (let name in json) {
 
-                let field = form.querySelector("[name =" + nameReplace("_", "") + "]");
+                let field = form.querySelector("[name =" + name.replace("_", "") + "]");
 
 
                 if (field) {
 
-                    if (field.type === "file") continue;
+                    switch (field.type) {
+                        case 'file':
+                            continue;
+
+
+                        case 'radio':
+                            field = form.querySelector("[name =" + name.replace("_", "") + "][value =" + json[name] + "]");
+                            field.checked = true;
+                            break;
+
+                        case 'checkbox':
+                            field.checked = json[name];
+
+                            break;
+
+                        default:
+                            field.value = json[name];
+
+                    }
 
                     field.value = json[name];
+
+
+
                 }
             }
 
             this.showPanelUpdate();
         });
+
 
         this.tableEl.appendChild(tr);
 
