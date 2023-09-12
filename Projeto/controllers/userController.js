@@ -17,259 +17,295 @@ class UserController {
         });
 
         this.formUpdateEl.addEventListener("submit", event => {
+
             event.preventDefault();
-            let btn = this.formUpdateEl.querySelector("[type=submit]");
+
+            let btn = this.formUpdateEl.querySelector("[type=submit]")
 
             btn.disabled = true;
+
             let values = this.getValues(this.formUpdateEl);
 
             let index = this.formUpdateEl.dataset.trIndex;
 
-            let tr = this.tableEl.rows[index]; 
+            let tr = this.tableEl.rows[index];
 
-        tr.dataset.user = JSON.stringify(values);
-        tr.innerHTML = `
- 
-        <td><img src=${values.photo} class="img-circle img-sm"></td>
-        <td>${values.name}</td>
-        <td>${values.email}</td>
-        <td>${values.admin ? 'Sim' : 'Nao'}</td>
-        <td>${Utils.dataFormat(values.register)}</td>
-        <td>
-            <button type="button" class="btn btn-primary  btn-edit  btn-xs btn-flat">Editar</button>
-            <button type="button" class="btn   btn-danger  btn-xs btn-flat">Excluir</button>
-        </td> 
-   
-   `;
+            let userOld = JSON.parse(tr.dataset.user);
 
-   this.addEventsTr(tr);
+            let result = Object.assign({}, userOld, values);
 
-   this.updateCount();
-
-        });
-    }
-
-
-
-    onSubmit() {
-        /* onSubmit evento quando enviarem ,
-comando this sempre ira respeitar o escopo  onde esta atuando !! */
-
-        this.formEl.addEventListener("submit", event => {
-
-            event.preventDefault();
-
-            let btn = this.formEl.querySelector("[type=submit]");
-
-            btn.disabled = true;
-
-            let values = this.getValues(this.formEl);
-
-            if (!values) return false;
-
-
-            this.getPhoto().then(
+            this.getPhoto(this.formUpdateEl).then(
                 (content) => {
-                    values.photo = content;
-                    this.addLine(values);
-                    this.formEl.reset();
 
-                    btn.disabled = false;
-                },
+                    if (!values.photo){ 
+                        result._photo = userOld._photo;
+                    } else {
+                        result._photo = content;
+                    }
 
-                function (e) {
-                    console.error(e);
-                }
+                    tr.dataset.user = JSON.stringify(result);
 
-            );
-
-        });
-
-    }
-
-    getPhoto() {
-
-        return new Promise((resolve, reject) => {
-            let fileReader = new FileReader();
-
-            let elements = [...this.formEl.elements].filter(item => {
-
-                if (item.name === 'photo') {
-                    return item;
-                }
-
-            });
-
-            let file = elements[0].files[0];
-
-            fileReader.onload = () => {
-
-                resolve(fileReader.result);
-
-            };
-
-            fileReader.onerror = (e) => {
-                reject(e);
-            };
-
-            if (file) {
-                fileReader.readAsDataURL(file);
-            } else {
-                resolve();
-
-            }
-
-        });
-
-    }
-    /* the function getValues() will get all the values entered by the user */
-
-    getValues(formEl) {
-
-        /* type let will only exist inside the getValues() function outside it will not exist*/
-        let user = {};
-        let isValid = true;
-
-        [...formEl.elements].forEach(function (field, index) {
-            if (['name', 'email', 'password'].indexOf(field.name) > -1 && !field.value) {
-                field.parentElement.classList.add('has-error');
-                isValid = false;
-            }
-
-            if (field.name === "gender") {
-
-                if (field.checked) {
-                    user[field.name] = field.value
-                }
-
-            } else if (field.name == "admin") {
-                user[field.name] = field.checked;
-
-            } else {
-
-                user[field.name] = field.value;
-
-            }
-        });
-
-        if (!isValid) {
-            return false;
-        }
-
-        return new User(
-            user.name,
-            user.gender,
-            user.birth,
-            user.country,
-            user.email,
-            user.password,
-            user.photo,
-            user.admin,
-            user.register
-        );
-    }
-
-    addLine(dataUser) {
-        let tr = document.createElement('tr');
-
-        tr.dataset.user = JSON.stringify(dataUser);
-        tr.innerHTML = `
+                        tr.innerHTML = `
+                        
  
-     <td><img src=${dataUser.photo} class="img-circle img-sm"></td>
-     <td>${dataUser.name}</td>
-     <td>${dataUser.email}</td>
-     <td>${dataUser.admin ? 'Sim' : 'Nao'}</td>
-     <td>${Utils.dataFormat(dataUser.register)}</td>
-     <td>
-         <button type="button" class="btn btn-primary  btn-edit  btn-xs btn-flat">Editar</button>
-         <button type="button" class="btn   btn-danger  btn-xs btn-flat">Excluir</button>
-     </td> 
+                        <td><img src=${result._photo} class="img-circle img-sm"></td>
+                        <td>${result._name}</td>
+                        <td>${result._email}</td>
+                        <td>${result._admin ? 'Sim' : 'Nao'}</td>
+                        <td>${Utils.dataFormat(result._register)}</td>
+                        <td>
+                            <button type="button" class="btn btn-primary  btn-edit  btn-xs btn-flat">Editar</button>
+                            <button type="button" class="btn   btn-danger  btn-xs btn-flat">Excluir</button>
+                        </td> 
+                   
+                   `;
+                
+                   this.addEventsTr(tr);
 
-`;
+                   this.updateCount();
 
+                   this.formUpdateEl.reset();
+           
+                   this.showPanelCreate();
 
-   this.addEventsTr(tr);
+                   btn.disabled = false;
 
-     
-        this.tableEl.appendChild(tr);
+               }, 
+               (e) => {
+                   console.error(e)
+               }
+           );
 
-        this.updateCount();
+       });
 
-    }
-addEventsTr(tr){
-    tr.querySelector(".btn-edit").addEventListener("click", e => {
-        let json = JSON.parse(tr.dataset.user);
+   }
 
-        let form = document.querySelector("#form-user-update");
+   onSubmit(){
 
-        form.dataset.trIndex = tr.sectionRowIndex;
+       this.formEl.addEventListener("submit", event => {
 
-        for (let name in json) {
+           event.preventDefault();
 
-            let field = form.querySelector("[name =" + name.replace("_", "") + "]");
+           let btn = this.formEl.querySelector("[type=submit]");
 
+           btn.disabled = true;
 
-            if (field) {
+           let values = this.getValues(this.formEl);
 
-                switch (field.type) {
-                    case 'file':
-                        continue;
+           if (!values) return false;
 
+           this.getPhoto(this.formEl).then(
+               (content) => {
 
-                    case 'radio':
-                        field = form.querySelector("[name =" + name.replace("_", "") + "][value =" + json[name] + "]");
-                        field.checked = true;
-                        break;
+                   values.photo = content;
 
-                    case 'checkbox':
-                        field.checked = json[name];
+                   this.addLine(values);
 
-                        break;
+                   this.formEl.reset();
 
-                    default:
-                        field.value = json[name];
+                   btn.disabled = false;
 
-                }
+               }, 
+               (e) => {
+                   console.error(e)
+               }
+           );
+       
+       });
 
-                field.value = json[name];
+   }
 
-            }
-        }
+   getPhoto(formEl){
 
-        this.showPanelUpdate();
-    });
+       return new Promise((resolve, reject) => {
 
+           let fileReader = new FileReader();
 
-}
-    showPanelCreate() {
+           let elements = [...formEl.elements].filter(item => {
 
-        document.querySelector("#box-user-create").style.display = "block";
-        document.querySelector("#box-user-update").style.display = "none";
+               if (item.name === 'photo') {
+                   return item;
+               }
 
-    }
-    showPanelUpdate() {
+           });
 
-        document.querySelector("#box-user-create").style.display = "none";
-        document.querySelector("#box-user-update").style.display = "block";
+           let file = elements[0].files[0];
 
-    }
+           fileReader.onload = () => {
 
-    updateCount() {
+               resolve(fileReader.result);
 
-        let numberUsers = 0;
-        let numberAdmin = 0;
+           };
 
-        [...this.tableEl.children].forEach(tr => {
+           fileReader.onerror = (e) => {
 
-            numberUsers++;
+               reject(e);
 
-            let user = JSON.parse(tr.dataset.user);
+           };
 
-            if (user._admin) numberAdmin++;
-        })
+           if(file) {
+               fileReader.readAsDataURL(file);
+           } else {
+               resolve('dist/img/boxed-bg.jpg');
+           }
 
-        document.querySelector("#number-users").innerHTML = numberUsers;
-        document.querySelector("#number-users-admin").innerHTML = numberAdmin;
+       });
 
-    }
+   }
+
+   getValues(formEl){
+
+       let user = {};
+       let isValid = true;
+
+       [...formEl.elements].forEach(function(field, index){
+
+           if (['name', 'email', 'password'].indexOf(field.name) > -1 && !field.value) {
+
+               field.parentElement.classList.add("has-error");
+               isValid = false
+
+           }
+
+           if (field.name === "gender") {
+   
+               if (field.checked) {
+                   user[field.name] = field.value
+               }
+   
+           } else if(field.name == "admin") {
+
+               user[field.name] = field.checked;
+
+           } else {
+   
+               user[field.name] = field.value
+   
+           }
+   
+       });
+
+       if (!isValid) {
+           return false;
+       }
+   
+       return new User(
+           user.name, 
+           user.gender, 
+           user.birth, 
+           user.country, 
+           user.email, 
+           user.password, 
+           user.photo, 
+           user.admin
+       );
+
+   }
+   
+   addLine(dataUser) {
+
+       let tr = document.createElement('tr');
+
+       tr.dataset.user = JSON.stringify(dataUser);
+
+       tr.innerHTML = `
+           <tr>
+               <td><img src=${dataUser.photo} class="img-circle img-sm"></td>
+               <td>${dataUser.name}</td>
+               <td>${dataUser.email}</td>
+               <td>${(dataUser.admin) ? 'Sim' : 'Não'}</td>
+               <td>${Utils.dataFormat(dataUser.register)}</td>
+               <td>
+                   <button type="button" class="btn btn-primary btn-edit btn-xs btn-flat">Editar</button>
+                   <button type="button" class="btn btn-danger btn-xs btn-flat">Excluir</button>
+               </td>
+           </tr>
+       `;
+
+       this.addEventsTr(tr);
+
+       this.tableEl.appendChild(tr);
+
+       this.updateCount();
+
+   }
+
+   addEventsTr(tr) {
+
+       tr.querySelector(".btn-edit").addEventListener("click", e => {
+
+           let json = JSON.parse(tr.dataset.user);
+
+           this.formUpdateEl.dataset.trIndex = tr.sectionRowIndex;
+
+           for (let name in json) {
+
+               let field = this.formUpdateEl.querySelector("[name=" + name.replace("_", "") + "]");
+
+               if (field) {
+
+                   switch (field.type) {
+                       case 'file':
+                           continue;
+                           break;
+                           
+                       case 'radio':
+                           field = this.formUpdateEl.querySelector("[name=" + name.replace("_", "") + "][value=" + json[name] + "]");
+                           field.checked = true;
+                       break;
+
+                       case 'checkbox':
+                           field.checked = json[name];
+                       break;
+
+                       default:
+                           field.value = json[name];
+
+                   }
+
+                   field.value = json[name];
+               }
+
+           }
+
+           this.formUpdateEl.querySelector(".photo").src = json._photo
+           
+           this.showPanelUpdate();
+
+       });
+
+   }
+
+   showPanelCreate(){
+
+       document.querySelector("#box-user-create").style.display = "block";
+       document.querySelector("#box-user-update").style.display = "none";
+
+   }
+
+   showPanelUpdate(){
+
+       document.querySelector("#box-user-create").style.display = "none";
+       document.querySelector("#box-user-update").style.display = "block";
+
+   }
+
+   updateCount(){
+
+       let numberUsers = 0;
+       let numberAdmin = 0;
+
+       [...this.tableEl.children].forEach(tr => {
+
+           numberUsers++;
+
+           let user = JSON.parse(tr.dataset.user);
+
+           if (user._admin) numberAdmin++;
+       })
+
+       document.querySelector("#number-users").innerHTML = numberUsers;
+       document.querySelector("#number-users-admin").innerHTML = numberAdmin;
+
+   }
 }
